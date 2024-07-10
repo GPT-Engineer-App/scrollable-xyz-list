@@ -52,7 +52,7 @@ const Index = () => {
       .then((dictionaryText) => {
         const dictionaryWords = dictionaryText.split("\n").map((word) => word.trim());
         const available = [];
-        dictionaryWords.forEach((word, index) => {
+        dictionaryWords.forEach((word) => {
           setCheckingDomain(word);
           if (!uploadedFile.includes(word)) {
             available.push(word);
