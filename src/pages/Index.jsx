@@ -4,10 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { readFileAsText } from "@/utils/fileReader";
+import { Loader } from "@/components/ui/loader";
 
 const Index = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [availableDomains, setAvailableDomains] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [checkingDomain, setCheckingDomain] = useState("");
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -43,12 +46,21 @@ const Index = () => {
   });
 
   const handleCompare = () => {
+    setIsLoading(true);
     fetch("/src/data/words.txt")
       .then((response) => response.text())
       .then((dictionaryText) => {
         const dictionaryWords = dictionaryText.split("\n").map((word) => word.trim());
-        const available = dictionaryWords.filter((word) => !uploadedFile.includes(word));
+        const available = [];
+        dictionaryWords.forEach((word, index) => {
+          setCheckingDomain(word);
+          if (!uploadedFile.includes(word)) {
+            available.push(word);
+          }
+        });
         setAvailableDomains(available);
+        setIsLoading(false);
+        setCheckingDomain("");
       });
   };
 
@@ -73,6 +85,12 @@ const Index = () => {
 
       <section>
         <h2 className="text-2xl font-bold mb-4">Available Domains</h2>
+        {isLoading && (
+          <div className="flex items-center mb-4">
+            <Loader className="mr-2" />
+            <p>Checking {checkingDomain}...</p>
+          </div>
+        )}
         <div className="overflow-auto h-96 border p-4">
           {data?.pages.map((page, pageIndex) => (
             <React.Fragment key={pageIndex}>
